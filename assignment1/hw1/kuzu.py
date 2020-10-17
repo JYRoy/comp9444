@@ -22,14 +22,12 @@ class NetFull(nn.Module):
     def __init__(self):
         super(NetFull, self).__init__()
         self.linear1 = nn.Linear(in_features=28*28, out_features=300, bias=True)
-        self.linear2 = nn.Linear(in_features=300, out_features=100, bias=True)
-        self.linear3 = nn.Linear(in_features=100, out_features=10, bias=True)
+        self.linear2 = nn.Linear(in_features=300, out_features=10, bias=True)
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
         x = F.tanh(self.linear1(x))
-        x = F.tanh(self.linear2(x))
-        x = F.log_softmax(self.linear3(x))
+        x = F.log_softmax(self.linear2(x))
         return x
 
 class NetConv(nn.Module):
@@ -52,9 +50,9 @@ class NetConv(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.linear1 = nn.Sequential(
-            nn.Linear(in_features=50 * 5 * 5, out_features=512, bias=True),
+            nn.Linear(in_features=50 * 5 * 5, out_features=625, bias=True),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 10)
+            nn.Linear(625, 10)
         )
 
     def forward(self, x):
