@@ -85,10 +85,13 @@ def main():
     # choose network architecture
     if args.net == 'lin':
         net = NetLin().to(device)
+        print(net)
     elif args.net == 'full':
         net = NetFull().to(device)
+        print(net)
     else:
         net = NetConv().to(device)
+        print(net)
 
     if list(net.parameters()):
         # use SGD optimizer
