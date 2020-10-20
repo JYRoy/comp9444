@@ -41,21 +41,20 @@ def graph_hidden(net, layer, node):
     ycoord = torch.repeat_interleave(yrange, xrange.size()[0], dim=0)
     grid = torch.cat((xcoord.unsqueeze(1), ycoord.unsqueeze(1)), 1)
 
-    with torch.no_grad():
-        plt.clf()
+    with torch.no_grad():  # suppress updating of gradients
         net.eval()  # toggle batch norm, dropout
-        net(grid)
-
-        if layer == 1:
-            output = net.hidden_layer_1[:, node]
-        else:
-            output = net.hidden_layer_2[:, node]
-
+        output = net(grid)
         net.train()  # toggle batch norm, dropout back again
 
-        pred = (output >= 0.5).float()
+        if layer == 1:
+            pred = (net.hidden_layer_1[:, node] >= 0.5).float()
+        else:
+            pred = (net.hidden_layer_2[:, node] >= 0.5).float()
+
+        #pred = (output >= 0.5).float()
 
         # plot function computed by model
+        plt.clf()
         plt.pcolormesh(xrange, yrange, pred.cpu().view(yrange.size()[0], xrange.size()[0]), shading='auto',
                        cmap='Wistia')
 
