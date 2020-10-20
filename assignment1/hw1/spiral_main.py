@@ -83,6 +83,8 @@ if list(net.parameters()):
     # use Adam optimizer
     optimizer = torch.optim.Adam(net.parameters(),eps=0.000001,lr=args.lr,
                                  betas=(0.9,0.999),weight_decay=0.0001)
+    # test the SGD optimizer
+    #optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=0.9,weight_decay=0.0001)
 
     # training loop
     for epoch in range(1, args.epochs):
