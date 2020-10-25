@@ -1,6 +1,6 @@
 # encoder.py
 # COMP9444, CSE, UNSW
-
+# z5304897 Junyu Zhang
 import torch
 
 star16 = torch.Tensor(

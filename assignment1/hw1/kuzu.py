@@ -1,6 +1,6 @@
 # kuzu.py
 # COMP9444, CSE, UNSW
-
+# z5304897 Junyu Zhang
 from __future__ import print_function
 import torch
 import torch.nn as nn
