@@ -43,20 +43,20 @@ def tokenise(sample):
 
 def preprocessing(sample):
     """
-    Called after tokenising but before numericalising.
+    Called after tokenising but before numericalising. "numericalising" is the process of assigning each word (or token) in the text with a number or id
     """
 
     return sample
 
 def postprocessing(batch, vocab):
     """
-    Called after numericalising but before vectorising.
+    Called after numericalising but before vectorising. "vectorising" is when we transform a text into a vector 
     """
 
     return batch
 
 stopWords = {}
-wordVectors = GloVe(name='6B', dim=50)
+wordVectors = GloVe(name='6B', dim=50)  #name of the file that contains the vectors
 
 ################################################################################
 ####### The following determines the processing of label data (ratings) ########
@@ -91,6 +91,7 @@ class network(tnn.Module):
 
     def forward(self, input, length):
         pass
+        return ratingOutput, categoryOutput
 
 class loss(tnn.Module):
     """
