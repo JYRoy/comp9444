@@ -35,28 +35,17 @@ from config import device
 ################################################################################
 
 def tokenise(sample):
-    """划分单词
+    """
     Called before any processing of the text has occurred.
     """
-
     processed = sample.split()
-
     return processed
 
 
 def preprocessing(sample):
-    """单词形式下的操作，vector里面是一个一个的单词
+    """
     Called after tokenising but before numericalising. "numericalising" is the process of assigning each word (or token) in the text with a number or id
     """
-    # temp = []
-    # for word in sample:
-    #     word = word.replace(',', '').replace('.', '').replace('!', '').replace('?', '').replace('(', '').replace(')',
-    #                                                                                                              '').replace(
-    #         '\"', '').replace(':', '').replace(';', '').replace('$', '').replace('&', '').replace('%', '').replace('*',
-    #                                                                                                                '').replace(
-    #         '@', '').replace('#', '').replace('^', '').replace('/', '')
-    #     temp.append(word)
-    # sample = temp
     # remove illegal characters
     sample = [re.sub(r'[^\x00-\x7f]', r'', word) for word in sample]
     # remove punctuations
@@ -67,28 +56,13 @@ def preprocessing(sample):
 
 
 def postprocessing(batch, vocab):
-    """当前batch内是数字，
+    """
     Called after numericalising but before vectorising. "vectorising" is when we transform a text into a vector 
     """
     return batch
 
 
 # Useless words.
-# stopWords = {'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd",
-#              'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers',
-#              'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which',
-#              'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been',
-#              'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but',
-#              'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against',
-#              'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down',
-#              'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when',
-#              'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no',
-#              'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don',
-#              "don't", 'should', "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't",
-#              'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven',
-#              "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan',
-#              "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn',
-#              "wouldn't"}
 stopWords = {'i', 'oh', "i'm", "i've", "i'd", "i'll", 'me', 'my', 'myself', 'we', "we've", "we'd", "we'll", 'us',
              'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd", 'your', 'yours', 'yourself',
              'yourselves', 'he', "he'll", "he'd", 'him', 'his', 'himself', 'she', "she'll", "she'd", "she's",
@@ -237,7 +211,6 @@ def convertNetOutput(ratingOutput, categoryOutput):
     correctRating = rating == ratingOutputs.flatten()
     correctCategory = businessCategory == categoryOutputs.flatten()
     """
-
     ratingOutput = ratingOutput.long()
     categoryOutput = categoryOutput.long()
     return ratingOutput.argmax(dim=1), categoryOutput.argmax(dim=1)
@@ -268,7 +241,6 @@ class network(tnn.Module):
             batch_first=True,
             bidirectional=True)
         self.linear_rating_1 = tnn.Linear(in_features=400, out_features=200)
-        #self.linear_rating_2 = tnn.Linear(in_features=200, out_features=100)
         self.linear_rating_3 = tnn.Linear(in_features=200, out_features=2)
 
         self.lstm2 = tnn.LSTM(
@@ -279,7 +251,6 @@ class network(tnn.Module):
             batch_first=True,
             bidirectional=True)
         self.linear_category_1 = tnn.Linear(in_features=400, out_features=200)
-        #self.linear_category_2 = tnn.Linear(in_features=200, out_features=100)
         self.linear_category_3 = tnn.Linear(in_features=200, out_features=5)
 
     def forward(self, input, length):
@@ -287,13 +258,11 @@ class network(tnn.Module):
             input)  # (batch, seq_len, hidden_size * num_directions)
         hidden_rating = hidden_rating[-1, :, :]  # (num_layers * num_directions, batch, hidden_size)
         ratingOutput = self.Relu(self.linear_rating_1(hidden_rating))
-        #ratingOutput = self.Relu(self.linear_rating_2(ratingOutput))
         ratingOutput = self.linear_rating_3(ratingOutput)
 
         output_category, (hidden_category, cell_category) = self.lstm2(input)
         hidden_category = hidden_category[-1, :, :]
         categoryOutput = self.Relu(self.linear_category_1(hidden_category))
-        #categoryOutput = self.Relu(self.linear_category_2(categoryOutput))
         categoryOutput = self.linear_category_3(categoryOutput)
         return ratingOutput, categoryOutput
 
@@ -309,15 +278,6 @@ class loss(tnn.Module):
         self.entroy = tnn.CrossEntropyLoss()
 
     def forward(self, ratingOutput, categoryOutput, ratingTarget, categoryTarget):
-        # ratingTarget = ratingTarget.type(torch.FloatTensor).to(device)
-        # categoryTarget = categoryTarget.type(torch.FloatTensor).to(device)
-        #
-        # lossRating = torch.abs(ratingOutput - ratingTarget)
-        # lossRating = torch.mean(lossRating**2)
-        #
-        # lossCategory = torch.abs(categoryOutput - categoryTarget)
-        # lossCategory = torch.mean(lossCategory**2)
-
         lossRating = self.entroy(ratingOutput, ratingTarget)
         lossCategory = self.entroy(categoryOutput, categoryTarget)
         return lossRating + lossCategory
@@ -334,7 +294,3 @@ trainValSplit = 0.8
 batchSize = 64
 epochs = 10
 optimiser = toptim.Adam(net.parameters(), lr=0.003)
-# SGD lr=1, score=80
-# Adam lr=0.001, score=82.5
-# Adam lr=0.005, score=80.41
-# Adam lr=0.003, score=83.7
