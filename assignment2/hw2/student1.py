@@ -35,7 +35,7 @@ from config import device
 ################################################################################
 
 def tokenise(sample):
-    """
+    """划分单词
     Called before any processing of the text has occurred.
     """
     processed = sample.split()
@@ -56,7 +56,7 @@ def preprocessing(sample):
 
 
 def postprocessing(batch, vocab):
-    """
+    """当前batch内是数字，
     Called after numericalising but before vectorising. "vectorising" is when we transform a text into a vector 
     """
     return batch
@@ -206,11 +206,12 @@ def convertNetOutput(ratingOutput, categoryOutput):
     predictions must be of type LongTensor, taking the values 0 or 1 for the
     rating, and 0, 1, 2, 3, or 4 for the business category.  If your network
     outputs a different representation convert the output here.
-    
+
     针对Calculate performance部分的问题,数据格式（LongTensor），数据维度
     correctRating = rating == ratingOutputs.flatten()
     correctCategory = businessCategory == categoryOutputs.flatten()
     """
+
     ratingOutput = ratingOutput.long()
     categoryOutput = categoryOutput.long()
     return ratingOutput.argmax(dim=1), categoryOutput.argmax(dim=1)
