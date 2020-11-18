@@ -131,7 +131,8 @@ class network(tnn.Module):
             batch_first=True,
             bidirectional=True)
         self.linear_rating_1 = tnn.Linear(in_features=400, out_features=200)
-        self.linear_rating_3 = tnn.Linear(in_features=200, out_features=2)
+        self.linear_rating_2 = tnn.Linear(in_features=200, out_features=100)
+        self.linear_rating_3 = tnn.Linear(in_features=100, out_features=2)
 
         self.lstm2 = tnn.LSTM(
             input_size=200,
@@ -141,17 +142,20 @@ class network(tnn.Module):
             batch_first=True,
             bidirectional=True)
         self.linear_category_1 = tnn.Linear(in_features=400, out_features=200)
-        self.linear_category_3 = tnn.Linear(in_features=200, out_features=5)
+        self.linear_category_2 = tnn.Linear(in_features=200, out_features=100)
+        self.linear_category_3 = tnn.Linear(in_features=100, out_features=5)
 
     def forward(self, input, length):
         output_rating, (hidden_rating, cell_rating) = self.lstm1(input)
         hidden_rating = hidden_rating[-1, :, :]
         ratingOutput = self.Relu(self.dropout(self.linear_rating_1(hidden_rating)))
+        ratingOutput = self.Relu(self.dropout(self.linear_rating_2(ratingOutput)))
         ratingOutput = self.linear_rating_3(ratingOutput)
 
         output_category, (hidden_category, cell_category) = self.lstm2(input)
         hidden_category = hidden_category[-1, :, :]
         categoryOutput = self.Relu(self.dropout(self.linear_category_1(hidden_category)))
+        categoryOutput = self.Relu(self.dropout(self.linear_category_2(categoryOutput)))
         categoryOutput = self.linear_category_3(categoryOutput)
         return ratingOutput, categoryOutput
 
