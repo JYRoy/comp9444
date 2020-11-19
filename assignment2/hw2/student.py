@@ -1,5 +1,29 @@
 #!/usr/bin/env python3
 # encoding: utf-8
+#Group：g023656, He Zhao and Junyu Zhang
+"""
+For the part of tokenising, we use words as tokens. The tokens are splited by the space.
+after that we remove tokens that are useless characters, punctuations and numbers in preprocessing.
+For stop words, we selected some useless words which does not have emotional tendency in review text. 
+However, we did not come to a solution to use postprocessing for improvement. Therefore, we kept the 
+batches and return them.In the design of the network, we decided to use two separate nets to handle the two tasks.
+For each task, there are one Bi-LSTM with 0.5 dropout and three linear layers with two Relu as activation.
+For different tasks, the final linear layer which is output layer will have the different output channels 
+according to the number of classes in the task. For the prediction of rating, the number of output channels
+will be 2. For the prediction of business category, the number of output channels will be 5. We use cross entropy
+as the loss function in the experiment for both tasks.After trying different numbers of dimension [50, 100, 200, 300] 
+for the GloVe vectors, we decided to use 200 dimension which gives better performance than the other values.
+In converting the output of the net, we change the type of the output to long. Then the final result is decided
+by applying argmax function to the output.
+
+In the training process, we used 0.8 as the ratio between train set and test set to adjust the network 
+structure initially. At the end of the experiment, we changed the ratio to 0.9 instead of 0.8 as we wanted
+more data to be used in training instead of testing. This will improve the performance of the model.We use Adam 
+as the optimizer rather than SGD, since it has better performance in reducing the loss. We also
+tried different parameter for batch size ranging from 32 to 256. We found that 128 is a good choice for the model.
+
+Our best weighted score reached 85.55%.
+"""
 """
 student.py
 
@@ -39,6 +63,7 @@ def tokenise(sample):
     """
     Called before any processing of the text has occurred.
     """
+    # Spliting words by space
     processed = sample.split()
     return processed
 
@@ -47,7 +72,7 @@ def preprocessing(sample):
     """
     Called after tokenising but before numericalising. "numericalising" is the process of assigning each word (or token) in the text with a number or id
     """
-    # remove illegal characters
+    # remove useless characters
     sample = [re.sub(r'[^\x00-\x7f]', r'', word) for word in sample]
     # remove punctuations
     sample = [word.strip(string.punctuation) for word in sample]
@@ -81,8 +106,8 @@ stopWords = {'i', 'oh', "i'm", "i've", "i'd", "i'll", 'me', 'my', 'myself', 'we'
              'haven', "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't",
              'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", "would",
              'wouldn', "wouldn't", 'yep', 'co', "food", "restaurant", "place", "day", "fees", "bank"}
-
-wordVectors = GloVe(name='6B', dim=200)  # name of the file that contains the vectors把原本的单词转化成vector  调用GloVe 50维的
+# 200 dimensions vectors
+wordVectors = GloVe(name='6B', dim=200)  # name of the file that contains the vectors
 
 
 ################################################################################
@@ -96,13 +121,11 @@ def convertNetOutput(ratingOutput, categoryOutput):
     predictions must be of type LongTensor, taking the values 0 or 1 for the
     rating, and 0, 1, 2, 3, or 4 for the business category.  If your network
     outputs a different representation convert the output here.
-
-    针对Calculate performance部分的问题,数据格式（LongTensor），数据维度
-    correctRating = rating == ratingOutputs.flatten()
-    correctCategory = businessCategory == categoryOutputs.flatten()
     """
+    # changing the date typr to long
     ratingOutput = ratingOutput.long()
     categoryOutput = categoryOutput.long()
+    # select the maximum value in vectors
     return ratingOutput.argmax(dim=1), categoryOutput.argmax(dim=1)
 
 
@@ -183,7 +206,10 @@ lossFunc = loss()
 ################## The following determines training options ###################
 ################################################################################
 
+# training better model by using more data.
 trainValSplit = 0.9
+# increasing batchSize from 32 to 256
 batchSize = 128
 epochs = 10
+# Adam with 0.003 learning rate could decrease the loss faster than SGD
 optimiser = toptim.Adam(net.parameters(), lr=0.003)
